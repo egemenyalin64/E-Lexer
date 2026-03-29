@@ -18,7 +18,7 @@ Lexer_Rule_Return Lexer_Rule_int(String str) {
 }
 
 Lexer_Rule_Return Lexer_Rule_whitespace(String str) {
-   if (!str.length) return INV_LEXER_RULE_RET;
+   // if (!str.length) return INV_LEXER_RULE_RET;
 
    str.buffer += str.length;
    i4 counter = -str.length;
@@ -112,6 +112,25 @@ success:
    return ret;
 }
 
+u1 solo_symbols[32] = {'!', '"', '#', '$', '%', '&', '\'', '(', ')', '*', '+', ',', '-', '.', '/', ':', ';', '<', '=', '>', '?', '@', '[', '\\', ']', '^', '_', '`', '{', '|', '}', '~'};
+
+Lexer_Rule_Return Lexer_Rule_symbol(String str) {
+   u1 c = str.buffer[0];
+
+   i4 low = -1, high = sizeof(solo_symbols);
+
+   while (low != high) {
+      i4 mid = (low + high) >> 1;
+      i4 diff = c - solo_symbols[mid];
+      if (diff == 0)
+         return (Lexer_Rule_Return){{{c}, TOKEN_TYPE_SYMBOL}, 1};
+      if (diff < 0) high = mid;
+      else low = mid;
+   }
+
+   return INV_LEXER_RULE_RET;
+}
+
 Token_Unit *Lexer_run(String input, Lexer *lexer, Pool *token_pool) {
    assert(token_pool->unit_size == sizeof(Token_Unit));
 
@@ -119,24 +138,29 @@ Token_Unit *Lexer_run(String input, Lexer *lexer, Pool *token_pool) {
    Token_Unit *head = &first_unit;
    i4 i = 0;
 
-   while (i < input.length) {
+   while (i != input.length) {
       String rest = {input.buffer + i, input.length - i};
-      i++;
       for (i4 j = 0; j < lexer->rule_count; j++) {
          Lexer_Rule_Return rule_ret = lexer->rules[j](rest);
          if (rule_ret.length) {
             Token_Unit *unit = Pool_alloc(token_pool);
-            if (unit == &token_pool->null_unit) return 0;
+            if (unit == &token_pool->null_unit) goto error_exit;
             unit->token = rule_ret.token;
             SLL_insert_after(unit, head);
             head = unit;
-            i += rule_ret.length - 1;
-            break;
+            i += rule_ret.length;
+            goto continue_loop;
          }
       }
+      goto error_exit;
+      continue_loop:
    }
 
    return first_unit.next;
+
+error_exit:
+   Lexer_free_tokens(first_unit.next, token_pool);
+   return 0;
 }
 
 void Lexer_free_tokens(Token_Unit *token, Pool *token_pool) {
