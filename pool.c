@@ -1,11 +1,13 @@
 #define P0_BUILD
 
 #include "pool.h"
+#include <stdio.h>
 
 void Pool_init(Pool *pool, u4 unit_size) {
    pool->unit_size = unit_size;
 
    pool->null_block.size = 0;
+   pool->null_block.count = 0;
    pool->null_block.next = &pool->null_block;
    pool->null_block.prev = &pool->null_block;
    pool->head_block = &pool->null_block;
@@ -67,3 +69,14 @@ void Pool_free_block(Pool *pool, PL_BH *block) {
       pool->head_free = pool->head_free->next;
 }
 
+void Pool_print_block(PL_BH *block) {
+   printf("%d/%d\n", block->count, block->size);
+}
+
+void Pool_print_blocks(Pool *pool) {
+   PL_BH *block = pool->head_block;
+   do {
+      Pool_print_block(block);
+      block = block->next;
+   } while (block != &pool->null_block);
+}

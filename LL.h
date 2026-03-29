@@ -28,4 +28,9 @@ static inline void DLL_pop(DLL_UH *unit) {
    prev->next = next, next->prev = prev;
 }
 
+static inline void SLL_insert_after(SLL_UH *unit, SLL_UH *prev) {
+   unit->next = prev->next;
+   prev->next = unit;
+}
+
 #endif

@@ -34,4 +34,7 @@ PREFIX void  Pool_free_block(Pool *pool, PL_BH *block);
 
 static inline u4 create_block_size(Pool *pool, u4 count) { return sizeof(PL_BH) + pool->unit_size * count; }
 
+PREFIX void Pool_print_block(PL_BH *block);
+PREFIX void Pool_print_blocks(Pool *pool);
+
 #endif

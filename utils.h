@@ -18,8 +18,8 @@ struct StrInt_Return {
    i4 length;
 };
 
-PREFIX StrInt_Return str_to_int_le(String str, u4 base);
-PREFIX StrInt_Return str_to_int_be(String str, u4 base);
+PREFIX StrInt_Return str_to_int_le(String str, i4 base);
+PREFIX StrInt_Return str_to_int_be(String str, i4 base);
 PREFIX StrInt_Return std_str_to_int(String str);
 
 #endif
