@@ -54,8 +54,19 @@ void read_str(u1 *src, u1 *dest, i4 dest_size) {
    i4 src_i = 0;
    i4 dest_i = 0;
    while (dest_i != dest_size) {
-      if (src_i == '\\') src_i++;
-      dest[dest_i++] = src[src_i++];
+      u1 c = src[src_i];
+      if (c == '\\') {
+         src_i++;
+         c = src[src_i];
+         switch (c) {
+         case '0': c = '\0'; break;
+         case 'n': c = '\n'; break;
+         case 't': c = '\t'; break;
+         }
+      }
+
+      dest[dest_i] = c;
+      dest_i++, src_i++;
    }
 }
 
@@ -96,4 +107,3 @@ success:
 
    return ret;
 }
-
